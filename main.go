@@ -51,8 +51,8 @@ func main() {
 		fmt.Println("Failed to open messages.txt")
 	}
 
-	for i := range <-getLinesChannel(file) {
-		line := <-getLinesChannel(file)
+	lines := getLinesChannel(file)
+	for line := range lines {
 		fmt.Printf("read: %s\n", line)
 	}
 }
