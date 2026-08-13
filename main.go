@@ -2,44 +2,57 @@ package main
 
 import (
 	"fmt"
+	"io"
 	"os"
 	"strings"
 )
 
-func readFromFile() {
+func getLinesChannel(f io.ReadCloser) <-chan string {
+	// create channel of type string
+	ch := make(chan string)
+
+	// go routine with parsing logic
+	go func() {
+		defer close(ch)
+		buffer := ""
+
+		for {
+			// create an array of size 8 bytes
+			data := make([]byte, 8)
+			// read from file and populate 8 bytes from messages.txt
+			count, err := f.Read(data)
+			if err != nil {
+				break //EOF
+			}
+
+			// convert bytes to string and add to buffer
+			chunk := string(data[:count])
+			buffer += chunk
+
+			// split buffer with every \n found
+			slices := strings.Split(buffer, "\n")
+
+			// if a \n was found send line down channel and update buffer
+			if len(slices) > 1 {
+				for i := range len(slices) - 1 {
+					ch <- slices[i]
+					buffer = slices[i+1]
+				}
+			}
+		}
+	}()
+
+	return ch
+}
+
+func main() {
 	file, err := os.Open("messages.txt")
 	if err != nil {
 		fmt.Println("Failed to open messages.txt")
 	}
 
-	buffer := ""
-
-	for {
-		// create an array of size 8 bytes
-		data := make([]byte, 8)
-		// read from file and populate 8 bytes from messages.txt
-		count, err := file.Read(data)
-		if err != nil {
-			break //EOF
-		}
-
-		// convert bytes to string and add to buffer
-		chunk := string(data[:count])
-		buffer += chunk
-
-		// split buffer with every \n found
-		slices := strings.Split(buffer, "\n")
-
-		// if a \n was found print line and update buffer
-		if len(slices) > 1 {
-			for i := range len(slices) - 1 {
-				fmt.Printf("read: %s\n", slices[i])
-				buffer = slices[i + 1]
-			}
-		}
+	for i := range <-getLinesChannel(file) {
+		line := <-getLinesChannel(file)
+		fmt.Printf("read: %s\n", line)
 	}
-}
-
-func main() {
-	readFromFile()
 }
