@@ -1,0 +1,6 @@
+Connection accepted!
+read: GET / HTTP/1.1
+read: Host: localhost:8080
+read: User-Agent: curl/8.21.0
+read: Accept: */*
+read: 
