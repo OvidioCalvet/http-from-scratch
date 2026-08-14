@@ -1,7 +1,7 @@
 package main
 
 import (
-	"fmt"
+	"log"
 	"net"
 	"io"
 )
@@ -9,11 +9,11 @@ import (
 func main() {
 	laddr, err := net.ResolveUDPAddr("udp", "localhost:8080")
 	if err != nil {
-		fmt.Println("Error resolving udp address")
+		log.Println("Error resolving udp address")
 	}
 
 	conn, err := net.DialUDP("udp", laddr, nil)
 	if err != nil {
-		fmt.Println("Error establishing UDP connection")
+		log.Println("Error establishing UDP connection")
 	}
 }

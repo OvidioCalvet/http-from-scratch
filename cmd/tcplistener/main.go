@@ -1,6 +1,7 @@
 package main
 
 import (
+	"log"
 	"fmt"
 	"net"
 	"strings"
@@ -47,15 +48,15 @@ func getLinesChannel(c net.Conn) <-chan string {
 func main() {
 	listener, err := net.Listen("tcp", "localhost:8080")
 	if err != nil {
-		fmt.Println("Failed to start tcp listener")
+		log.Println("Failed to start tcp listener")
 	}
 
 	for {
 		conn, err := listener.Accept()
 		if err != nil {
-			fmt.Println("Failed to accept tcp connection at desired port")
+			log.Println("Failed to accept tcp connection at desired port")
 		} else {
-			fmt.Println("Connection accepted!")
+			log.Println("Connection accepted!")
 		}
 
 		lines := getLinesChannel(conn)
