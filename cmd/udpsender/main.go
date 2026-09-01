@@ -14,7 +14,7 @@ func main() {
 		log.Println("Error resolving udp address")
 	}
 
-	raddr, err := net.ResolveUDPAddr("udp", "localhost:8000")
+	raddr, err := net.ResolveUDPAddr("udp", "localhost:8080")
 	if err != nil {
 		log.Println("Error resolving udp address")
 	}
