@@ -1,9 +1,11 @@
 package main
 
 import (
+	"bufio"
 	"log"
 	"net"
-	"io"
+	"os"
+	"fmt"
 )
 
 func main() {
@@ -15,5 +17,18 @@ func main() {
 	conn, err := net.DialUDP("udp", laddr, nil)
 	if err != nil {
 		log.Println("Error establishing UDP connection")
+	}
+
+	reader := bufio.NewReader(os.Stdin)
+
+	for {
+		fmt.Printf(">")
+
+		line, err := reader.ReadString('\n')
+		if err != nil {
+			log.Println("Error reading string from reader")
+		}
+
+		conn.Write([]byte(line))
 	}
 }
