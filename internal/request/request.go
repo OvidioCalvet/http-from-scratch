@@ -1,6 +1,7 @@
 package request
 
 import (
+	"errors"
 	"io"
 	"log"
 	"strings"
@@ -23,13 +24,22 @@ func requestFromReader(reader io.Reader) (*Request, error) {
 		log.Fatal(err)
 	}
 
+	parsedLines := parseRequestLine(request)
+
 }
 
-func parseRequestLine(request string) (*string) {
-	requestLine := strings.Split(request, "\r\n")
-	if len(requestLine) > 0 {
-		return &requestLine[0]
+func parseRequestLine(request string) (*RequestLine, error) {
+	parsedLines := strings.Split(request, "\r\n")
+
+	if len(parsedLines) == 3 {
+		requestLine := RequestLine {
+			HttpVersion: parsedLines[0],
+			RequestTarget: parsedLines[1],
+			Method: parsedLines[2],
+		}
+
+		return &requestLine
 	}
-	err := "Parsing request line could not be done"
-	return &err
+
+	return errors.New("improper request format")
 }
