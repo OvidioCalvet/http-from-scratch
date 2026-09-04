@@ -3,43 +3,51 @@ package request
 import (
 	"errors"
 	"io"
-	"log"
 	"strings"
 )
 
 type Request struct {
-    RequestLine RequestLine
+	RequestLine RequestLine
 }
 
 type RequestLine struct {
-    HttpVersion   string
-    RequestTarget string
-    Method        string
+	HttpVersion   string
+	RequestTarget string
+	Method        string
 }
 
-func requestFromReader(reader io.Reader) (*Request, error) {
-	// read entire request as a single string
+func RequestFromReader(reader io.Reader) (*Request, error) {
 	request, err := io.ReadAll(reader)
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 
-	parsedLines := parseRequestLine(request)
+	requestLine, err := parseRequestLine(string(request))
+	if err != nil {
+		return nil, err
+	}
 
+	return &Request{
+		RequestLine: *requestLine,
+	}, nil
 }
 
-func parseRequestLine(request string) (*RequestLine, error) {
-	parsedLines := strings.Split(request, "\r\n")
-
-	if len(parsedLines) == 3 {
-		requestLine := RequestLine {
-			HttpVersion: parsedLines[0],
-			RequestTarget: parsedLines[1],
-			Method: parsedLines[2],
-		}
-
-		return &requestLine
+func parseRequestLine(line string) (*RequestLine, error) {
+	parts := strings.Split(line, "\r\n")
+	if len(parts) == 0 {
+		return nil, errors.New("improper request format")
 	}
 
-	return errors.New("improper request format")
+	fields := strings.Fields(parts[0])
+	if len(fields) != 3 {
+		return nil, errors.New("improper request line format")
+	}
+
+	httpVersion := strings.TrimPrefix(fields[2], "HTTP/")
+
+	return &RequestLine{
+		Method:        fields[0],
+		RequestTarget: fields[1],
+		HttpVersion:   httpVersion,
+	}, nil
 }
